@@ -30,6 +30,7 @@ SensorTag.discover(function(sensorTag) {
     } else if (right) {
       debug('right pressed')
       press(rightKey)
+      press(36) // return
     }
   })
 })
