@@ -13,13 +13,29 @@ $ npm install blueslider -g
 Usage
 -----
 
-Launch:
+1. Launch: `$ blueslider`
+2. If your SensorTag is not automatically found, press the
+   side button.
+3. Your SensorTag is discovered.
+4. Press the right and/or left button to turn your slides!
+5. Have fun :)
+
+### Example Output
 
 ```
-$ blueslider
+$ node index.js
+  blue searching for a sensor tag +0ms
+  blue discovered +68ms fb94b8dde3ab42d590f32f58d6fab5dc
+  blue connected +552ms
+  blue discovered all characteristics +20ms
+  blue notify correctly setted up +288ms
+  blue right pressed +1s
+  blue left pressed +742ms
+  blue right pressed +822ms
 ```
 
-And press the right and/or left button to turn your slides!
+Sometimes the discovery gets stuck before the 'notify correctly setted up' message.
+In that case, kill and restart.
 
 License
 -------
