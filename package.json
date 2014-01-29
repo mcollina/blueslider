@@ -4,6 +4,10 @@
   "description": "Turn your slides using your TI SensorTag",
   "main": "index.js",
   "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcollina/blueslider.git"
+  },
   "bin" : {
     "blueslider" : "./index.js"
   },
