@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 if (!process.env.DEBUG)
   process.env.DEBUG = 'blue'
 
