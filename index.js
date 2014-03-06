@@ -54,7 +54,12 @@ SensorTag.discover(function(sensorTag) {
     //debug('accelerometer:',x, y, z);
     cursor = getPos();
     var rpos = sm.shift(x, y);
-    move(cursor.x + sensitivity*rpos.x*accelPeriod, cursor.y + sensitivity*rpos.y*accelPeriod);
+    try {
+      move(cursor.x + sensitivity*rpos.x*accelPeriod, cursor.y + sensitivity*rpos.y*accelPeriod);
+    }
+    catch (err) {
+      debug(err);
+    }
   })
 })
 
