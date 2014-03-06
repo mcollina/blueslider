@@ -9,7 +9,10 @@ var debug = require('debug')('blue')
   , getPos = require('mac-key-press').getPos
   , leftKey = 123
   , rightKey = 124
-  , accelPeriod = 50
+  , accelPeriod = 1
+  , sensitivity = 200/accelPeriod
+
+var sm = new ShiftReg(4);
 
 debug('searching for a sensor tag')
 
@@ -50,8 +53,39 @@ SensorTag.discover(function(sensorTag) {
   sensorTag.on('accelerometerChange', function(x, y, z){
     //debug('accelerometer:',x, y, z);
     cursor = getPos();
-    move(cursor.x + 500*x, cursor.y + 500*y);
+    var rpos = sm.shift(x, y);
+    move(cursor.x + sensitivity*rpos.x*accelPeriod, cursor.y + sensitivity*rpos.y*accelPeriod);
   })
 })
+
+function ShiftReg(len){
+  this.x = new Array();
+  this.y = new Array();
+  for (var i = (len - 1) || 4; i >= 0; i--) {
+    this.x[i] = 0;
+    this.y[i] = 0;
+  };
+}
+
+ShiftReg.prototype.shift = function(x, y){
+  this.x.unshift(x);
+  this.x.pop();
+  this.y.unshift(y);
+  this.y.pop();
+  return this.smooth();
+}
+
+ShiftReg.prototype.smooth = function(){
+  var smoothed = new Object();
+  smoothed.x = 0;
+  smoothed.y = 0;
+  for (var i=this.x.length - 1; i >= 0; i--) {
+    smoothed.x+=this.x[i];
+    smoothed.y+=this.y[i];
+  };
+  smoothed.x/=this.x.length;
+  smoothed.y/=this.y.length;
+  return smoothed;
+}
 
 
