@@ -88,7 +88,6 @@ SensorTag.discover(function(sensorTag) {
       debounce = true;
       setTimeout(function(){debounce=false;}, debounceTime);
     };
-    previousSgn = objectTemperature/objectTemperature;
   });
 
 });
