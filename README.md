@@ -20,6 +20,22 @@ Usage
 4. Press the right and/or left button to turn your slides!
 5. Have fun :)
 
+Command line options
+--------------------
+
+```
+Use your TI SensorTag to control your mac.
+Usage: blueslisder --verbose --left-key [key1] --right-key [key] --no-mouse --acc-period [period] --mouse-sensitivity [sensitivity]
+
+Options:
+  -v, --verbose            verbose output                               
+  -l, --left-key           press [key] using the left button.             [default: 123]
+  -r, --right-key          press [key] using the right button.            [default: 124]
+  -m, --no-mouse           disable mouse support                        
+  -a, --acc-period         accelerometer measurement update period in ms  [default: 50]
+  -s, --mouse-sensitivity  mouse sensitivity                              [default: 200]
+```
+
 ### Example Output
 
 ```
