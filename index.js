@@ -9,69 +9,150 @@ var debug = require('debug')('blue')
   , getPos = require('mac-key-press').getPos
   , leftKey = 123
   , rightKey = 124
-  , accelPeriod = 100
-  , sensitivity = 200/accelPeriod
+  , accelPeriod = 50
+  , sensitivity = 200
+
+var yargs = require('yargs')
+           .usage('Use your TI SensorTag to control your mac.\nUsage: $0 --verbose --left-key [key1] --right-key [key] --no-mouse --acc-period [period] --mouse-sensitivity [sensitivity]')
+           .boolean(['v', 'm'])
+           .alias('v', 'verbose')
+           .describe('v', 'verbose output')
+           .alias('l', 'left-key')
+           .alias('r', 'right-key')
+           .describe('l','press [key] using the left button.')
+           .default('l', leftKey)
+           .describe('r','press [key] using the right button.')
+           .default('r', rightKey)
+           .alias('m', 'no-mouse')
+           .describe('m', 'disable mouse support')
+           .alias('a', 'acc-period')
+           .default('a', accelPeriod)
+           .describe('a', 'accelerometer measurement update period in ms')
+           .alias('s', 'mouse-sensitivity')
+           .default('s', sensitivity)
+           .describe('s', 'mouse sensitivity');
 
 var sm = new ShiftReg(4);
 var mouseEnabled = false;
 var debounce = false;
 var debounceTime = 2000;
 
+if (yargs.argv.l instanceof Array){
+  yargs.argv.l.forEach(validateKey);
+}
+else {
+  validateKey(yargs.argv.l);
+}
+
+if (yargs.argv.r instanceof Array){
+  yargs.argv.r.forEach(validateKey);
+}
+else {
+  validateKey(yargs.argv.r);
+}
+
+
+if(!isInt(yargs.argv.a) || yargs.argv.a<1 || yargs.argv.a>2000){
+    console.log('period must be integer from 1 to 2000 ms\n\n');
+    console.log(yargs.help());
+    process.exit(-1);
+}
+
+if(!isInt(yargs.argv.s) || yargs.argv.s == 0){
+    console.log('sensitivity must be integer and not null\n\n');
+    console.log(yargs.help());
+    process.exit(-1);
+}
+
+
 debug('searching for a sensor tag')
+
 
 SensorTag.discover(function(sensorTag) {
   debug('discovered', sensorTag.uuid)
 
   sensorTag.connect(function() {
-    debug('connected')
+    debug('connected');
     sensorTag.discoverServicesAndCharacteristics(function() {
-      debug('discovered all characteristics')
+      if (yargs.argv.v) {
+        debug('discovered all characteristics');
+      }
       sensorTag.notifySimpleKey(function() {
-        debug('simplekey notify correctly set up')
+        if (yargs.argv.v) {
+          debug('simplekey notify correctly set up')
+        }
       });
-      sensorTag.setAccelerometerPeriod(accelPeriod, function(){
-        debug('accelerometer period set to', accelPeriod)
+      sensorTag.setAccelerometerPeriod(yargs.argv.a, function(){
+        if (yargs.argv.v) {
+          debug('accelerometer period set to', accelPeriod)
+        }
       });
-      sensorTag.enableIrTemperature(function() {
-        debug('ir temperature enabled')
-      });
-      sensorTag.notifyIrTemperature(function() {
-        debug('ir temperature notify correctly set up')
-      })
+      if(!yargs.argv.m){
+        sensorTag.enableIrTemperature(function() {
+          if (yargs.argv.v) {
+            debug('ir temperature enabled')
+          }
+        });
+        sensorTag.notifyIrTemperature(function() {
+          if (yargs.argv.v) {
+            debug('ir temperature notify correctly set up')
+          }
+        })
+      }
     });
   })
 
 
   sensorTag.on('simpleKeyChange', function(left, right) {
     if (left) {
-      debug('left pressed')
-      press(leftKey)
+      if (yargs.argv.v) {
+        debug('left pressed')
+      }
+      if (yargs.argv.l instanceof Array){
+        yargs.argv.l.forEach(press);
+      }
+      else {
+        press(yargs.argv.l);
+      }
     } else if (right) {
-      debug('right pressed')
-      press(rightKey)
-      press(36) // return
+      if (yargs.argv.v) {
+        debug('right pressed')
+      }
+      if (yargs.argv.r instanceof Array){
+        yargs.argv.r.forEach(press);
+      }
+      else {
+        press(yargs.argv.r);
+      }
     }
   });
 
   sensorTag.on('accelerometerChange', function(x, y, z){
-    //debug('accelerometer:',x, y, z);
+    if (yargs.argv.v) {
+      debug('accelerometer:',x, y, z);
+    }
     cursor = getPos();
     var rpos = sm.shift(x, y);
     try {
-      move(cursor.x + sensitivity*rpos.x*accelPeriod, cursor.y + sensitivity*rpos.y*accelPeriod);
+      move(cursor.x + yargs.argv.s*rpos.x, cursor.y + yargs.argv.s*rpos.y);
     }
     catch (err) {
-      debug(err);
+      if (yargs.argv.v) {
+        debug(err);
+      }
     }
   });
   sensorTag.on('irTemperatureChange', function(objectTemperature, ambientTemperature){
-    // debug('temp', objectTemperature, ambientTemperature);
     if (objectTemperature < 0 && !mouseEnabled && !debounce){
       sensorTag.enableAccelerometer(function() {
-        debug('accelerometer enabled')
+        if (yargs.argv.v) {
+          debug('accelerometer enabled')
+        }
       });
       sensorTag.notifyAccelerometer(function() {
-        debug('accelerometer notify correctly set up')
+        if (yargs.argv.v) {
+          debug('accelerometer notify correctly set up')
+        }
       });
       mouseEnabled = true;
       debounce = true;
@@ -79,10 +160,14 @@ SensorTag.discover(function(sensorTag) {
     };
     if (objectTemperature < 0 && mouseEnabled && !debounce){
       sensorTag.disableAccelerometer(function() {
-        debug('accelerometer disabled')
+        if (yargs.argv.v) {
+          debug('accelerometer disabled')
+        }
       });
       sensorTag.unnotifyAccelerometer(function() {
-        debug('accelerometer notify disabled')
+        if (yargs.argv.v) {
+          debug('accelerometer notify disabled')
+        }
       });
       mouseEnabled = false;
       debounce = true;
@@ -92,6 +177,17 @@ SensorTag.discover(function(sensorTag) {
 
 });
 
+function isInt(n) {
+   return typeof n === 'number' && n % 1 == 0;
+}
+
+function validateKey(key){
+    if(!isInt(key) || key<0 || key>127){
+    console.log('keys must be integer from 0 to 127\n\n');
+    console.log(yargs.help());
+    process.exit(-1);
+  }
+}
 
 
 function ShiftReg(len){

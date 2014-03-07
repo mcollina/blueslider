@@ -19,7 +19,8 @@
   "dependencies": {
     "sensortag": "~0.1.7",
     "debug": "~0.7.4",
-    "mac-key-press": "git://github.com/barto-/mac-press-key.git"
+    "mac-key-press": "~0.1.0",
+    "yargs": "~1.2.1"
   },
   "keywords": [
     "bluetooth",
