@@ -9,10 +9,13 @@ var debug = require('debug')('blue')
   , getPos = require('mac-key-press').getPos
   , leftKey = 123
   , rightKey = 124
-  , accelPeriod = 1
+  , accelPeriod = 100
   , sensitivity = 200/accelPeriod
 
 var sm = new ShiftReg(4);
+var mouseEnabled = false;
+var debounce = false;
+var debounceTime = 2000;
 
 debug('searching for a sensor tag')
 
@@ -29,11 +32,11 @@ SensorTag.discover(function(sensorTag) {
       sensorTag.setAccelerometerPeriod(accelPeriod, function(){
         debug('accelerometer period set to', accelPeriod)
       });
-      sensorTag.enableAccelerometer(function() {
-        debug('accelerometer enabled')
+      sensorTag.enableIrTemperature(function() {
+        debug('ir temperature enabled')
       });
-      sensorTag.notifyAccelerometer(function() {
-        debug('accelerometer notify correctly set up')
+      sensorTag.notifyIrTemperature(function() {
+        debug('ir temperature notify correctly set up')
       })
     });
   })
@@ -60,8 +63,37 @@ SensorTag.discover(function(sensorTag) {
     catch (err) {
       debug(err);
     }
-  })
-})
+  });
+  sensorTag.on('irTemperatureChange', function(objectTemperature, ambientTemperature){
+    // debug('temp', objectTemperature, ambientTemperature);
+    if (objectTemperature < 0 && !mouseEnabled && !debounce){
+      sensorTag.enableAccelerometer(function() {
+        debug('accelerometer enabled')
+      });
+      sensorTag.notifyAccelerometer(function() {
+        debug('accelerometer notify correctly set up')
+      });
+      mouseEnabled = true;
+      debounce = true;
+      setTimeout(function(){debounce=false;}, debounceTime);
+    };
+    if (objectTemperature < 0 && mouseEnabled && !debounce){
+      sensorTag.disableAccelerometer(function() {
+        debug('accelerometer disabled')
+      });
+      sensorTag.unnotifyAccelerometer(function() {
+        debug('accelerometer notify disabled')
+      });
+      mouseEnabled = false;
+      debounce = true;
+      setTimeout(function(){debounce=false;}, debounceTime);
+    };
+    previousSgn = objectTemperature/objectTemperature;
+  });
+
+});
+
+
 
 function ShiftReg(len){
   this.x = new Array();
