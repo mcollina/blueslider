@@ -13,7 +13,7 @@ var debug = require('debug')('blue')
   , sensitivity = 200
 
 var yargs = require('yargs')
-           .usage('Use your TI SensorTag to control your mac.\nUsage: $0 --verbose --left-key [key1] --right-key [key] --no-mouse --acc-period [period] --mouse-sensitivity [sensitivity]')
+           .usage('Use your TI SensorTag to control your mac.\nUsage: $0 --verbose --left-key [key1] --right-key [key] --mouse --acc-period [period] --mouse-sensitivity [sensitivity]')
            .boolean(['v', 'm'])
            .alias('v', 'verbose')
            .describe('v', 'verbose output')

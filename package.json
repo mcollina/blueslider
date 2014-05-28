@@ -1,6 +1,6 @@
 {
   "name": "blueslider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Turn your slides using your TI SensorTag",
   "main": "index.js",
   "preferGlobal": true,
