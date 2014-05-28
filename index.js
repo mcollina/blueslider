@@ -23,14 +23,21 @@ var yargs = require('yargs')
            .default('l', leftKey)
            .describe('r','press [key] using the right button.')
            .default('r', rightKey)
-           .alias('m', 'no-mouse')
-           .describe('m', 'disable mouse support')
+           .alias('m', 'mouse')
+           .describe('m', 'enable mouse support')
            .alias('a', 'acc-period')
            .default('a', accelPeriod)
            .describe('a', 'accelerometer measurement update period in ms')
            .alias('s', 'mouse-sensitivity')
            .default('s', sensitivity)
-           .describe('s', 'mouse sensitivity');
+           .describe('s', 'mouse sensitivity')
+           .alias('h', 'help')
+           .describe('h', 'print this help');
+
+if (yargs.argv.h) {
+  console.log(yargs.help())
+  process.exit(-1)
+}
 
 var sm = new ShiftReg(4);
 var mouseEnabled = false;
@@ -87,7 +94,7 @@ SensorTag.discover(function(sensorTag) {
           debug('accelerometer period set to', accelPeriod)
         }
       });
-      if(!yargs.argv.m){
+      if(yargs.argv.m){
         sensorTag.enableIrTemperature(function() {
           if (yargs.argv.v) {
             debug('ir temperature enabled')
