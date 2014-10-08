@@ -41,6 +41,11 @@ if (yargs.argv.h) {
   process.exit(-1)
 }
 
+function verbose(msg) {
+  if (yargs.argv.v)
+    debug(msg)
+}
+
 var sm = new ShiftReg(4);
 var mouseEnabled = false;
 var debounce = false;
@@ -84,33 +89,22 @@ SensorTag.discover(function(sensorTag) {
   sensorTag.connect(function() {
     debug('connected');
     sensorTag.discoverServicesAndCharacteristics(function() {
-        console.log('aaa')
-      if (yargs.argv.v) {
-        debug('discovered all characteristics');
-      }
+      verbose('discovered all characteristics');
       sensorTag.notifySimpleKey(function() {
-        if (yargs.argv.v) {
-          debug('simplekey notify correctly set up')
-        }
+        verbose('simplekey notify correctly set up')
       });
 
       if(yargs.argv.m){
         sensorTag.setAccelerometerPeriod(yargs.argv.a, function(){
-          if (yargs.argv.v) {
-            debug('accelerometer period set to', accelPeriod)
-          }
+          verbose('accelerometer period set to', accelPeriod)
         });
 
         sensorTag.enableIrTemperature(function() {
-          if (yargs.argv.v) {
-            debug('ir temperature enabled')
-          }
+          verbose('ir temperature enabled')
         });
 
         sensorTag.notifyIrTemperature(function() {
-          if (yargs.argv.v) {
-            debug('ir temperature notify correctly set up')
-          }
+          verbose('ir temperature notify correctly set up')
         })
       }
     });
@@ -119,44 +113,32 @@ SensorTag.discover(function(sensorTag) {
 
   sensorTag.on('simpleKeyChange', function(left, right) {
     if (left) {
-      if (yargs.argv.v) {
-        debug('left pressed')
-      }
+      verbose('left pressed')
       pressLeft.forEach(press);
     } else if (right) {
-      if (yargs.argv.v) {
-        debug('right pressed')
-      }
+      verbose('right pressed')
       pressRight.forEach(press);
     }
   });
 
   sensorTag.on('accelerometerChange', function(x, y, z){
-    if (yargs.argv.v) {
-      debug('accelerometer:',x, y, z);
-    }
+    verbose('accelerometer:',x, y, z);
     cursor = getPos();
     var rpos = sm.shift(x, y);
     try {
       move(cursor.x + yargs.argv.s*rpos.x, cursor.y + yargs.argv.s*rpos.y);
     }
     catch (err) {
-      if (yargs.argv.v) {
-        debug(err);
-      }
+      verbose(err);
     }
   });
   sensorTag.on('irTemperatureChange', function(objectTemperature, ambientTemperature){
     if (objectTemperature < 0 && !mouseEnabled && !debounce){
       sensorTag.enableAccelerometer(function() {
-        if (yargs.argv.v) {
-          debug('accelerometer enabled')
-        }
+        verbose('accelerometer enabled')
       });
       sensorTag.notifyAccelerometer(function() {
-        if (yargs.argv.v) {
-          debug('accelerometer notify correctly set up')
-        }
+        verbose('accelerometer notify correctly set up')
       });
       mouseEnabled = true;
       debounce = true;
@@ -164,14 +146,10 @@ SensorTag.discover(function(sensorTag) {
     };
     if (objectTemperature < 0 && mouseEnabled && !debounce){
       sensorTag.disableAccelerometer(function() {
-        if (yargs.argv.v) {
-          debug('accelerometer disabled')
-        }
+        verbose('accelerometer disabled')
       });
       sensorTag.unnotifyAccelerometer(function() {
-        if (yargs.argv.v) {
-          debug('accelerometer notify disabled')
-        }
+        verbose('accelerometer notify disabled')
       });
       mouseEnabled = false;
       debounce = true;
