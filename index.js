@@ -11,6 +11,8 @@ var debug = require('debug')('blue')
   , rightKey = 124
   , accelPeriod = 50
   , sensitivity = 200
+  , pressLeft = []
+  , pressRight = []
 
 var yargs = require('yargs')
            .usage('Use your TI SensorTag to control your mac.\nUsage: $0 --verbose --left-key [key1] --right-key [key] --mouse --acc-period [period] --mouse-sensitivity [sensitivity]')
@@ -44,20 +46,21 @@ var mouseEnabled = false;
 var debounce = false;
 var debounceTime = 2000;
 
-if (yargs.argv.l instanceof Array){
-  yargs.argv.l.forEach(validateKey);
-}
-else {
-  validateKey(yargs.argv.l);
-}
-
-if (yargs.argv.r instanceof Array){
-  yargs.argv.r.forEach(validateKey);
-}
-else {
-  validateKey(yargs.argv.r);
+if (yargs.argv.l instanceof Array) {
+  pressLeft.push(yargs.argv.l)
+} else {
+  pressLeft = [yargs.argv.l]
 }
 
+pressLeft.forEach(validateKey);
+
+if (yargs.argv.r instanceof Array) {
+  pressRight.push(yargs.argv.r)
+} else {
+  pressRight = [yargs.argv.r]
+}
+
+pressRight.forEach(validateKey);
 
 if(!isInt(yargs.argv.a) || yargs.argv.a<1 || yargs.argv.a>2000){
     console.log('period must be integer from 1 to 2000 ms\n\n');
@@ -81,6 +84,7 @@ SensorTag.discover(function(sensorTag) {
   sensorTag.connect(function() {
     debug('connected');
     sensorTag.discoverServicesAndCharacteristics(function() {
+        console.log('aaa')
       if (yargs.argv.v) {
         debug('discovered all characteristics');
       }
@@ -89,17 +93,20 @@ SensorTag.discover(function(sensorTag) {
           debug('simplekey notify correctly set up')
         }
       });
-      sensorTag.setAccelerometerPeriod(yargs.argv.a, function(){
-        if (yargs.argv.v) {
-          debug('accelerometer period set to', accelPeriod)
-        }
-      });
+
       if(yargs.argv.m){
+        sensorTag.setAccelerometerPeriod(yargs.argv.a, function(){
+          if (yargs.argv.v) {
+            debug('accelerometer period set to', accelPeriod)
+          }
+        });
+
         sensorTag.enableIrTemperature(function() {
           if (yargs.argv.v) {
             debug('ir temperature enabled')
           }
         });
+
         sensorTag.notifyIrTemperature(function() {
           if (yargs.argv.v) {
             debug('ir temperature notify correctly set up')
@@ -115,22 +122,12 @@ SensorTag.discover(function(sensorTag) {
       if (yargs.argv.v) {
         debug('left pressed')
       }
-      if (yargs.argv.l instanceof Array){
-        yargs.argv.l.forEach(press);
-      }
-      else {
-        press(yargs.argv.l);
-      }
+      pressLeft.forEach(press);
     } else if (right) {
       if (yargs.argv.v) {
         debug('right pressed')
       }
-      if (yargs.argv.r instanceof Array){
-        yargs.argv.r.forEach(press);
-      }
-      else {
-        press(yargs.argv.r);
-      }
+      pressRight.forEach(press);
     }
   });
 
