@@ -17,10 +17,10 @@
   "author": "Matteo Collina <hello@matteocollina.com>",
   "license": "MIT",
   "dependencies": {
-    "sensortag": "~0.1.7",
-    "debug": "~0.7.4",
-    "mac-key-press": "~0.2.0",
-    "yargs": "~1.2.1"
+    "sensortag": "~1.2.0",
+    "debug": "~2.2.0",
+    "mac-key-press": "~0.3.0",
+    "yargs": "~3.29.0"
   },
   "keywords": [
     "bluetooth",
