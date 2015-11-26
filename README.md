@@ -1,7 +1,7 @@
 BlueSlider
 ==========
 
-Turn your slides using a [TI SensorTag](http://www.ti.com/ww/it/wireless_connectivity/sensortag/index.shtml?DCMP=PPC_Google_TI&k_clickid=0b13b7bf-a055-c929-ebb2-00004ba68f44&247SEM=) on Mac OS X.
+Turn your slides using a [TI SensorTag](http://www.ti.com/ww/it/wireless_connectivity/sensortag/index.shtml?DCMP=PPC_Google_TI&k_clickid=0b13b7bf-a055-c929-ebb2-00004ba68f44&247SEM=) or a [TI SensorTag 2](http://www.ti.com/tool/cc2650stk) on Mac OS X.
 
 Install
 -------
