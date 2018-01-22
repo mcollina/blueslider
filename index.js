@@ -41,9 +41,14 @@ if (yargs.argv.h) {
   process.exit(-1)
 }
 
-function verbose(msg) {
-  if (yargs.argv.v)
-    debug(msg)
+function verbose(msg, v) {
+  if (yargs.argv.v) {
+    if (v) {
+      debug(msg, v)
+    } else {
+      debug(msg)
+    }
+  }
 }
 
 var sm = new ShiftReg(4);
@@ -95,21 +100,18 @@ SensorTag.discover(function(sensorTag) {
       });
 
       if(yargs.argv.m){
-        sensorTag.setAccelerometerPeriod(yargs.argv.a, function(){
-          verbose('accelerometer period set to', accelPeriod)
+        sensorTag.enableAccelerometer(function(){
+          verbose('enabled accelerometer')
+          sensorTag.setAccelerometerPeriod(yargs.argv.a, function(){
+            verbose('accelerometer period set to', yargs.argv.a)
+            sensorTag.notifyAccelerometer(function() {
+              verbose('accelerometer notification set up')
+            })
+          });
         });
-
-        sensorTag.enableIrTemperature(function() {
-          verbose('ir temperature enabled')
-        });
-
-        sensorTag.notifyIrTemperature(function() {
-          verbose('ir temperature notify correctly set up')
-        })
       }
     });
   })
-
 
   sensorTag.on('simpleKeyChange', function(left, right) {
     if (left) {
@@ -132,31 +134,6 @@ SensorTag.discover(function(sensorTag) {
       verbose(err);
     }
   });
-  sensorTag.on('irTemperatureChange', function(objectTemperature, ambientTemperature){
-    if (objectTemperature < 0 && !mouseEnabled && !debounce){
-      sensorTag.enableAccelerometer(function() {
-        verbose('accelerometer enabled')
-      });
-      sensorTag.notifyAccelerometer(function() {
-        verbose('accelerometer notify correctly set up')
-      });
-      mouseEnabled = true;
-      debounce = true;
-      setTimeout(function(){debounce=false;}, debounceTime);
-    };
-    if (objectTemperature < 0 && mouseEnabled && !debounce){
-      sensorTag.disableAccelerometer(function() {
-        verbose('accelerometer disabled')
-      });
-      sensorTag.unnotifyAccelerometer(function() {
-        verbose('accelerometer notify disabled')
-      });
-      mouseEnabled = false;
-      debounce = true;
-      setTimeout(function(){debounce=false;}, debounceTime);
-    };
-  });
-
 });
 
 function isInt(n) {
